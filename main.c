@@ -9,21 +9,41 @@ typedef struct {
   char* path;
 } DM;
 
-int read_into_dms(FILE* f, DM* dms);
-void show_dms(DM* dms, int n);
+int read_into_dms(FILE *f, DM *dms);
+void show_dms(DM *dms, int n);
+
+const char *rc_file = "dmanrc";
 
 int main() {
-  FILE *file = fopen("/home/bikeboi/.config/dman/display-managers.txt", "r");
-  DM *dms = malloc(sizeof(DM*) * MAX_DM_COUNT);
-  if (file == NULL || dms == NULL) {
-    printf("RIP");
-  } else {
-      int num_read = read_into_dms(file,dms);
-      show_dms(dms,num_read);
-  }
-  //
-  free(dms);
-  return 0;
+	char *conf = getenv("XDG_CONFIG_HOME");
+	if(!conf) {
+		char *home = getenv("HOME");
+		printf("Can't find $XDG_CONFIG_HOME, home is %s\n", home);
+		//
+		conf = malloc (
+			// /home/xyz + / +         .config   + \0
+			strlen(home) + 1 + strlen(".config") + 1
+		);
+		sprintf(conf, "%s/%s%c", home, ".config", 0);
+	}
+	printf("Config home: %s\n", conf);
+
+	char rc_path[ strlen(conf) + 1 + strlen(rc_file) + 1 ];
+	sprintf(rc_path, "%s/%s%c", conf, rc_file, 0);
+
+	printf("dman runconf path: %s\n", rc_path);
+
+	FILE *file = fopen(rc_path, "r");
+	DM *dms = malloc(sizeof(DM) * MAX_DM_COUNT);
+	if (file == NULL || dms == NULL) {
+		printf("RIP");
+	} else {
+		int num_read = read_into_dms(file,dms);
+		show_dms(dms,num_read);
+	}
+	//
+	free(dms);
+	return 0;
 }
 
 int read_into_dms(FILE* f, DM* dms) {

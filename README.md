@@ -13,7 +13,7 @@ Format for the config file is as shown:
 window-manager-name : /path/to/its/bin
 ...
 ```
-The program looks for this file in the usual `~/.config/simdim/dmans`
+The program looks for this file in the usual `~/.config/dmanrc`
 
 ## License
 [MIT](./LICENSE)
