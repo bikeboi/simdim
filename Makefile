@@ -1,7 +1,19 @@
-FLAGS := -Wall -Wextra
+CC    := clang
+FLAGS := -Wall -Wextra -I
+
+SRC_DIR := src
+
+BIN_NAME = simdim
+
+.PHONY: all clean
+
+.all: debug
+
+.clean:
+	rm ./$(BIN_NAME) || true
 
 debug:	FLAGS += -g
-debug:	dman
+debug:  $(BIN_NAME)
 
-dman: main.c
-	gcc -o $@ ${FLAGS} $<
+${BIN_NAME}: $(SRC_DIR)/main.c
+	$(CC) -o $@ $(FLAGS) $<

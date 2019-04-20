@@ -2,11 +2,13 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "alloc.h"
 
 #define MAX_DM_COUNT 7
-#define WINDOW_MANS_FILE "window-mans"
+#define CONFIG_DIR "/simdim"
+#define WMAN_FILE "/window-mans"
 
 typedef struct {
   char *name;
@@ -16,37 +18,38 @@ typedef struct {
 int read_into_dms(FILE *f, DM **dms);
 void show_dms(DM **dms, int n);
 
-char* get_conf_home() {
-  char *conf = getenv("XDG_CONFIG_HOME");
-	if(!conf) {
-		char *home = getenv("HOME");
-		printf("Can't find $XDG_CONFIG_HOME, home is %s\n", home);
-		//
-		conf = malloc (
-                   // /home/xyz + / +         .config   + \0
-                   strlen(home) + 1 + strlen(".config") + 1);
-		sprintf(conf, "%s/%s%c", home, ".config", 0);
-	}
-  return conf;
+char* get_config_dir(Alloc* ally) {
+  char *xdg_conf = getenv("XDG_CONFIG_HOME");
+  char *home = getenv("HOME");
+  char *home_conf = home == NULL ? NULL : strcat(home, "/.config");
+  char default_home[50];
+  getcwd(default_home,50);
+
+  // This should be freed when it goes out of scope hopefully
+  char *found_home = xdg_conf ? xdg_conf : home_conf ? home_conf : default_home;
+  return alloc_cpy(strcat(found_home,CONFIG_DIR),ally);
 }
 
-char* get_conf_path(char* buffer) {
-  char* conf = get_conf_home();
-  char rc_path[ strlen(conf) + 1 + strlen(WINDOW_MANS_FILE) + 1 ];
-	sprintf(rc_path, "%s/%s%c", conf, WINDOW_MANS_FILE, 0);
-
-	printf("dman runconf path: %s\n", rc_path);
+char* mk_wman_path(char* config_dir, Alloc* ally) {
+  //                                                     Damn you null char
+  char *path = alloc(strlen(config_dir) + strlen(WMAN_FILE) + 1, ally);
+  strcpy(path, config_dir);
+  strcat(path, WMAN_FILE);
+  return path;
 }
 
 int main() {
-  char* home = get_conf_home();
-  printf("%s",home);
-
   Alloc* ally = new_alloc();
 
-  char* four_bytes = alloc(4,ally);
+  char *conf_home = get_config_dir(ally);
+  char *wman_filepath = mk_wman_path(conf_home, ally);
 
-  printf("%s",four_bytes);
+  printf("Conf home: %s\n",conf_home);
+  printf("Window Man file: %s\n", wman_filepath);
+
+  //char* four_bytes = alloc(4,ally);
+
+  //printf("%s",four_bytes);
   /*
 	FILE *file = fopen(rc_path, "r");
 	DM *dms = malloc(sizeof(DM) * MAX_DM_COUNT);
@@ -62,7 +65,8 @@ int main() {
   */
 
   // UGHH
-  free(home);
+
+  free_alloc(ally);
 
 	return 0;
 }
