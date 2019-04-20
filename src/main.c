@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "alloc.h"
+#include "parser.h"
 
 #define MAX_DM_COUNT 7
 #define CONFIG_DIR "/simdim"
@@ -31,7 +32,7 @@ char* get_config_dir(Alloc* ally) {
 }
 
 char* mk_wman_path(char* config_dir, Alloc* ally) {
-  //                                                     Damn you null char
+  //                                                Damn you -v-  null char
   char *path = alloc(strlen(config_dir) + strlen(WMAN_FILE) + 1, ally);
   strcpy(path, config_dir);
   strcat(path, WMAN_FILE);
@@ -47,13 +48,16 @@ int main() {
   printf("Conf home: %s\n",conf_home);
   printf("Window Man file: %s\n", wman_filepath);
 
-  //char* four_bytes = alloc(4,ally);
+  Pair* parsed = key_val("bob = steve",ally);
+  if (parsed == NULL) printf("RIP");
+  printf("Key: %s, Val: %s",parsed->key, parsed->val);
 
-  //printf("%s",four_bytes);
+  // Open file and display window managers
   /*
 	FILE *file = fopen(rc_path, "r");
-	DM *dms = malloc(sizeof(DM) * MAX_DM_COUNT);
-	if (file == NULL || dms == NULL) {
+  DM *dms = malloc(sizeof(DM) * MAX_DM_COUNT);
+
+  if (file == NULL || dms == NULL) {
 		printf("RIP");
 	} else {
 		int num_read = read_into_dms(file, &dms);

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdlib.h>
 
 #define MEM_SIZE 100000 // 100 Kb
@@ -9,14 +11,14 @@ typedef struct {
   size_t offset;
 } Alloc;
 
-Alloc* new_alloc() {
+Alloc *new_alloc() {
   Alloc* ally = malloc(sizeof(Alloc));
   ally->mem = malloc(sizeof(char*) * MEM_SIZE);
   ally->offset = 0;
   return ally;
 }
 
-char *alloc(size_t bytes, Alloc* ally) {
+void *alloc(size_t bytes, Alloc* ally) {
   if (ally->offset + bytes > MEM_SIZE) {
     printf("WARNING: Allocator maximum capacity reached. Memory overflow");
     exit(1);
@@ -27,7 +29,7 @@ char *alloc(size_t bytes, Alloc* ally) {
   return out;
 }
 
-char *alloc_cpy(char* source, Alloc* ally) {
+void *alloc_cpy(void* source, Alloc* ally) {
   size_t len = strlen(source);
   char* dest = alloc(len,ally);
   memcpy(dest,source,len);
